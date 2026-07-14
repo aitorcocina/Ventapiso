@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Venta del Piso — Control de Gastos</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root{
+  --paper: #F1ECDD;
+  --paper-2: #E8E0CB;
+  --ink: #25291F;
+  --ink-soft: #5C5A4C;
+  --terracotta: #B1532E;
+  --terracotta-dark: #8C4022;
+  --sage: #6E7A56;
+  --rose: #A8453A;
+  --yellow: #F0CC4E;
+  --yellow-deep: #DDB733;
+  --line: #C9BF9E;
+  --white: #FBF8EF;
+}
+
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:'Inter',sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{
+  max-width:880px;
+  margin:0 auto;
+  padding:28px 20px 80px;
+}
+
+/* ---- Header ---- */
+.masthead{
+  text-align:center;
+  padding-bottom:18px;
+  border-bottom:3px double var(--ink);
+  margin-bottom:28px;
+}
+.masthead .eyebrow{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;
+  letter-spacing:2.5px;
+  text-transform:uppercase;
+  color:var(--terracotta-dark);
+  margin-bottom:6px;
+}
+.masthead h1{
+  font-family:'Fraunces',serif;
+  font-weight:700;
+  font-size:clamp(28px,6vw,42px);
+  margin:0 0 6px;
+  letter-spacing:-0.5px;
+}
+.masthead .sub{
+  font-size:13.5px;
+  color:var(--ink-soft);
+}
+
+/* ---- Compra/Venta strip ---- */
+.deal{
+  display:flex;
+  gap:10px;
+  margin-bottom:22px;
+  flex-wrap:wrap;
+  max-width:380px;
+}
+.deal .card{
+  flex:1;
+  min-width:120px;
+  background:var(--white);
+  border:1px solid var(--line);
+  border-radius:6px;
+  padding:9px 12px;
+}
+.deal .card .label{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;
+  letter-spacing:1.1px;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+  margin-bottom:4px;
+}
+.deal .card .value{
+  font-family:'Fraunces',serif;
+  font-size:16px;
+  font-weight:600;
+}
+.deal .card .value.muted{color:var(--ink-soft); font-size:13px; font-weight:400;}
+.deal .card input{
+  font-family:'Fraunces',serif;
+  font-size:16px;
+  font-weight:600;
+  border:none;
+  background:transparent;
+  color:var(--terracotta-dark);
+  width:100%;
+  padding:0;
+  border-bottom:1px dashed var(--line);
+}
+.deal .card input:focus{outline:none; border-bottom-color:var(--terracotta);}
+
+/* ---- Two-column layout for expense tables ---- */
+.columns{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:26px;
+}
+@media (max-width:680px){
+  .columns{grid-template-columns:1fr;}
+}
+
+/* ---- Big result banner ---- */
+.banner{
+  background:var(--ink);
+  color:var(--paper);
+  border-radius:8px;
+  padding:20px 22px;
+  margin-bottom:34px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:10px;
+}
+.banner .l{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:12px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  color:#C9C2A4;
+}
+.banner .n{
+  font-family:'Fraunces',serif;
+  font-size:clamp(24px,5vw,34px);
+  font-weight:700;
+  color:var(--yellow);
+}
+
+/* ---- Section blocks ---- */
+section.block{margin-bottom:36px;}
+.block-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:baseline;
+  margin-bottom:10px;
+  border-bottom:2px solid var(--ink);
+  padding-bottom:6px;
+}
+.block-head h2{
+  font-family:'Fraunces',serif;
+  font-size:20px;
+  margin:0;
+  font-weight:600;
+}
+.block-head .tag{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10.5px;
+  color:var(--ink-soft);
+  letter-spacing:1px;
+}
+
+table.ledger{
+  width:100%;
+  border-collapse:collapse;
+}
+table.ledger tr.row td{
+  padding:8px 4px;
+  border-bottom:1px solid var(--line);
+  vertical-align:middle;
+}
+table.ledger tr.row:hover{background:rgba(0,0,0,0.02);}
+table.ledger td.name input{
+  width:100%;
+  border:none;
+  background:transparent;
+  font-size:14.5px;
+  color:var(--ink);
+  padding:4px 2px;
+}
+table.ledger td.name input:focus{outline:none;}
+table.ledger td.amt{
+  width:150px;
+  text-align:right;
+}
+table.ledger td.amt .amtwrap{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:3px;
+}
+table.ledger td.amt input{
+  width:110px;
+  text-align:right;
+  border:none;
+  background:transparent;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:14.5px;
+  color:var(--ink);
+  padding:4px 2px;
+}
+table.ledger td.amt input:focus{outline:none;}
+table.ledger td.amt .eur{font-size:13px; color:var(--ink-soft);}
+table.ledger td.del{
+  width:30px;
+  text-align:center;
+}
+.del-btn{
+  border:none;
+  background:none;
+  color:var(--rose);
+  font-size:16px;
+  cursor:pointer;
+  opacity:0.45;
+  line-height:1;
+  padding:2px 6px;
+}
+.del-btn:hover{opacity:1;}
+
+tr.subtotal td{
+  background:var(--yellow);
+  font-weight:700;
+  border-top:2px solid var(--ink);
+  border-bottom:2px solid var(--ink);
+}
+tr.subtotal td.name{font-family:'Fraunces',serif; font-size:15px;}
+tr.subtotal td.amt{font-family:'IBM Plex Mono',monospace; font-size:16px;}
+
+.add-row{
+  margin-top:10px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.add-btn{
+  border:1.5px dashed var(--ink-soft);
+  background:none;
+  color:var(--ink-soft);
+  font-family:'Inter',sans-serif;
+  font-size:13px;
+  padding:7px 14px;
+  border-radius:20px;
+  cursor:pointer;
+}
+.add-btn:hover{border-color:var(--terracotta); color:var(--terracotta-dark);}
+
+.empty-hint{
+  color:var(--ink-soft);
+  font-size:13px;
+  font-style:italic;
+  padding:14px 4px;
+}
+
+/* ---- Final result ---- */
+.final{
+  background:var(--terracotta);
+  color:var(--white);
+  border-radius:8px;
+  padding:22px;
+  text-align:center;
+  margin-top:6px;
+}
+.final .l{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:12px;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  opacity:0.85;
+  margin-bottom:6px;
+}
+.final .n{
+  font-family:'Fraunces',serif;
+  font-size:clamp(30px,7vw,46px);
+  font-weight:700;
+}
+
+.foot{
+  text-align:center;
+  margin-top:30px;
+  font-size:11.5px;
+  color:var(--ink-soft);
+}
+.foot button{
+  background:none;
+  border:none;
+  text-decoration:underline;
+  color:var(--ink-soft);
+  cursor:pointer;
+  font-size:11.5px;
+  padding:0;
+}
+
+.savebadge{
+  position:fixed;
+  bottom:16px;
+  right:16px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;
+  background:var(--ink);
+  color:var(--paper);
+  padding:6px 12px;
+  border-radius:14px;
+  opacity:0;
+  transition:opacity 0.4s;
+  pointer-events:none;
+}
+.savebadge.show{opacity:0.9;}
+
+@media (max-width:480px){
+  table.ledger td.amt{width:110px;}
+  table.ledger td.amt input{width:80px;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="masthead">
+    <div class="eyebrow">Cuaderno compartido</div>
+    <h1>Venta del Piso</h1>
+    <div class="sub">Control de gastos</div>
+  </div>
+
+  <div class="deal">
+    <div class="card">
+      <div class="label">Precio de compra</div>
+      <div class="value muted">358.000 €</div>
+    </div>
+    <div class="card">
+      <div class="label">Precio de venta</div>
+      <div class="value" id="precioVentaDisplay">455.000 €</div>
+    </div>
+  </div>
+
+  <div class="banner">
+    <span class="l">Disponible tras gastos fijos</span>
+    <span class="n" id="disponibleFijos">— €</span>
+  </div>
+
+  <div class="columns">
+    <section class="block">
+      <div class="block-head">
+        <h2>Gastos Fijos</h2>
+        <span class="tag" id="tagFijos">0 partidas</span>
+      </div>
+      <table class="ledger">
+        <tbody id="fixedBody"></tbody>
+      </table>
+      <div class="add-row">
+        <button class="add-btn" id="addFixed">+ añadir gasto fijo</button>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="block-head">
+        <h2>Futuros Gastos</h2>
+        <span class="tag" id="tagVar">0 partidas</span>
+      </div>
+      <table class="ledger">
+        <tbody id="varBody"></tbody>
+      </table>
+      <div class="add-row">
+        <button class="add-btn" id="addVar">+ añadir futuro gasto</button>
+      </div>
+    </section>
+  </div>
+
+  <div class="final">
+    <div class="l">Nos queda</div>
+    <div class="n" id="nosQueda">— €</div>
+  </div>
+
+  <div class="foot">
+    Conectado en la nube: lo que añada uno se ve al instante en el móvil del otro.
+    <br>
+    <button id="copyBtn" style="margin-top:6px;">📋 Copiar resumen para WhatsApp</button>
+    &nbsp;·&nbsp;
+    <button id="resetBtn">Restablecer datos de ejemplo</button>
+  </div>
+
+</div>
+
+<div class="savebadge" id="saveBadge">guardado</div>
+
+<script>
+// Tu base de datos en tiempo real (la que ya tenías creada)
+const DB_URL = "https://venta-piso-default-rtdb.europe-west1.firebasedatabase.app";
+const DB_PATH = "/datosPiso.json";
+let saveTimer = null;
+let pollTimer = null;
+let lastRemoteJSON = null;
+let lastLocalEditAt = 0;
+let pendingSave = false;
+
+function fmt(n){
+  if(isNaN(n)) n = 0;
+  return n.toLocaleString('es-ES', {minimumFractionDigits:0, maximumFractionDigits:2});
+}
+
+function parseNum(v){
+  if(typeof v === 'number') return v;
+  if(!v) return 0;
+  let s = String(v).trim().replace(/\./g,'').replace(',','.');
+  let n = parseFloat(s);
+  return isNaN(n) ? 0 : n;
+}
+
+function toArray(x){
+  if(Array.isArray(x)) return x;
+  if(x && typeof x === 'object'){
+    return Object.keys(x).sort((a,b)=>Number(a)-Number(b)).map(k=>x[k]).filter(Boolean);
+  }
+  return [];
+}
+
+function normalize(d){
+  d.fixed = toArray(d.fixed);
+  d.variable = toArray(d.variable);
+  if(typeof d.precioVenta !== 'number') d.precioVenta = parseNum(d.precioVenta);
+  return d;
+}
+
+function showBadge(text){
+  const badge = document.getElementById('saveBadge');
+  badge.textContent = text || 'guardado';
+  badge.classList.add('show');
+  setTimeout(()=>badge.classList.remove('show'), 1200);
+}
+
+async function fetchRemote(){
+  const res = await fetch(DB_URL + DB_PATH, {cache:'no-store'});
+  if(!res.ok) throw new Error('HTTP ' + res.status);
+  return await res.json();
+}
+
+async function pushRemote(payload){
+  const res = await fetch(DB_URL + DB_PATH, {
+    method: 'PUT',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(payload)
+  });
+  if(!res.ok) throw new Error('HTTP ' + res.status);
+  lastRemoteJSON = JSON.stringify(payload);
+}
+
+// Guarda ya mismo (sin espera), con reintentos. Se usa al añadir/borrar filas.
+async function saveNow(){
+  lastLocalEditAt = Date.now();
+  pendingSave = true;
+  const payload = JSON.parse(JSON.stringify(data));
+  let lastErr = null;
+  for(let attempt=0; attempt<3; attempt++){
+    try{
+      await pushRemote(payload);
+      pendingSave = false;
+      showBadge('guardado');
+      return;
+    } catch(e){
+      lastErr = e;
+      await new Promise(r=>setTimeout(r, 500 * (attempt+1)));
+    }
+  }
+  pendingSave = false;
+  console.error('No se pudo guardar tras varios intentos', lastErr);
+  showBadge('⚠️ sin conexión, reintenta');
+}
+
+// Guarda con un pequeño retraso, para no disparar una petición por cada tecla escrita.
+function scheduleSave(){
+  lastLocalEditAt = Date.now();
+  pendingSave = true;
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(()=>{ saveNow(); }, 500);
+}
+
+function isTyping(){
+  const el = document.activeElement;
+  return el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA');
+}
+
+function startPolling(){
+  clearInterval(pollTimer);
+  pollTimer = setInterval(async ()=>{
+    // No pisar cambios mientras alguien escribe, o justo después de guardar (margen de seguridad).
+    if(isTyping() || pendingSave) return;
+    if(Date.now() - lastLocalEditAt < 5000) return;
+    try{
+      const remote = await fetchRemote();
+      const remoteStr = JSON.stringify(remote);
+      if(remote && remoteStr !== lastRemoteJSON){
+        lastRemoteJSON = remoteStr;
+        data = normalize(remote);
+        render();
+      }
+    } catch(e){ /* sin conexión puntual, ignorar */ }
+  }, 4000);
+}
+
+async function init(){
+  try{
+    const remote = await fetchRemote();
+    if(remote){
+      data = normalize(remote);
+      lastRemoteJSON = JSON.stringify(remote);
+    } else {
+      data = JSON.parse(JSON.stringify(defaultData));
+      await pushRemote(data);
+    }
+  } catch(e){
+    console.error('No se pudo conectar con la base de datos, usando datos de ejemplo', e);
+    data = JSON.parse(JSON.stringify(defaultData));
+  }
+  migrate();
+  render();
+  startPolling();
+}
+
+const defaultData = {
+  precioVenta: 455000,
+  fixed: [
+    {name:'Hipoteca', amount:100000},
+    {name:'Coche', amount:1500},
+    {name:'Coche Vero', amount:3600},
+    {name:'Seguridad Social', amount:1980},
+    {name:'Visa', amount:1200}
+  ],
+  variable: [
+    {name:'Universidad Urtzi', amount:22500},
+    {name:'Plusvalía', amount:6000},
+    {name:'Hacienda', amount:25000},
+    {name:'Notaría Salamanca', amount:1000},
+    {name:'Casa Martín Yeltes', amount:70000},
+    {name:'Comisión Inmobiliaria', amount:9100},
+    {name:'Agonza Urtzi', amount:1850},
+    {name:'Pedrito', amount:3000}
+  ]
+};
+
+let data = null;
+
+function migrate(){
+  const renameMap = {
+    'Abogacía Urtzi': 'Agonza Urtzi',
+    'Otros Gastos': 'Coche Vero'
+  };
+  const removeNames = ['Compra coche', 'Obras'];
+  let changed = false;
+  [data.fixed, data.variable].forEach(list=>{
+    for(let i = list.length - 1; i >= 0; i--){
+      const item = list[i];
+      if(removeNames.includes(item.name)){
+        list.splice(i,1);
+        changed = true;
+        continue;
+      }
+      if(renameMap[item.name]){
+        item.name = renameMap[item.name];
+        changed = true;
+      }
+    }
+  });
+  if(changed) scheduleSave();
+}
+
+function sum(list){
+  return list.reduce((acc,it)=>acc + parseNum(it.amount), 0);
+}
+
+function buildRows(list, tbodyId, kind){
+  const tbody = document.getElementById(tbodyId);
+  tbody.innerHTML = '';
+  if(list.length === 0){
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td colspan="3" class="empty-hint">Sin partidas todavía. Añade la primera con el botón de abajo.</td>`;
+    tbody.appendChild(tr);
+  }
+  list.forEach((item, idx)=>{
+    const tr = document.createElement('tr');
+    tr.className = 'row';
+    tr.innerHTML = `
+      <td class="name"><input type="text" value="${escapeHtml(item.name)}" data-kind="${kind}" data-idx="${idx}" data-field="name"></td>
+      <td class="amt"><div class="amtwrap"><input type="text" inputmode="decimal" value="${fmt(parseNum(item.amount))}" data-kind="${kind}" data-idx="${idx}" data-field="amount"><span class="eur">€</span></div></td>
+      <td class="del"><button class="del-btn" data-kind="${kind}" data-idx="${idx}" title="Eliminar">✕</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+  const subtr = document.createElement('tr');
+  subtr.className = 'subtotal';
+  subtr.innerHTML = `<td class="name">Subtotal</td><td class="amt">${fmt(sum(list))} €</td><td class="del"></td>`;
+  tbody.appendChild(subtr);
+}
+
+function escapeHtml(s){
+  const d = document.createElement('div');
+  d.textContent = s == null ? '' : s;
+  return d.innerHTML;
+}
+
+function render(){
+  document.getElementById('precioVentaDisplay').textContent = fmt(parseNum(data.precioVenta)) + ' €';
+
+  buildRows(data.fixed, 'fixedBody', 'fixed');
+  buildRows(data.variable, 'varBody', 'variable');
+
+  document.getElementById('tagFijos').textContent = data.fixed.length + (data.fixed.length===1 ? ' partida' : ' partidas');
+  document.getElementById('tagVar').textContent = data.variable.length + (data.variable.length===1 ? ' partida' : ' partidas');
+
+  const totalFixed = sum(data.fixed);
+  const totalVar = sum(data.variable);
+  const venta = parseNum(data.precioVenta);
+  const disponible = venta - totalFixed;
+  const queda = disponible - totalVar;
+
+  document.getElementById('disponibleFijos').textContent = fmt(disponible) + ' €';
+  document.getElementById('nosQueda').textContent = fmt(queda) + ' €';
+
+  attachHandlers();
+}
+
+function attachHandlers(){
+  document.querySelectorAll('table.ledger input').forEach(inp=>{
+    inp.onblur = (e)=>{
+      const {kind, idx, field} = e.target.dataset;
+      const list = kind === 'fixed' ? data.fixed : data.variable;
+      if(field === 'amount'){
+        list[idx].amount = parseNum(e.target.value);
+      } else {
+        list[idx].name = e.target.value;
+      }
+      render();
+      scheduleSave();
+    };
+    inp.onkeydown = (e)=>{
+      if(e.key === 'Enter'){ e.target.blur(); }
+    };
+  });
+
+  document.querySelectorAll('.del-btn').forEach(btn=>{
+    btn.onclick = (e)=>{
+      const {kind, idx} = e.target.dataset;
+      const list = kind === 'fixed' ? data.fixed : data.variable;
+      list.splice(idx,1);
+      render();
+      saveNow();
+    };
+  });
+}
+
+document.getElementById('addFixed').onclick = ()=>{
+  data.fixed.push({name:'', amount:0});
+  render();
+  saveNow();
+  setTimeout(()=>{
+    const inputs = document.querySelectorAll('#fixedBody tr.row td.name input');
+    if(inputs.length) inputs[inputs.length-1].focus();
+  }, 30);
+};
+
+document.getElementById('addVar').onclick = ()=>{
+  data.variable.push({name:'', amount:0});
+  render();
+  saveNow();
+  setTimeout(()=>{
+    const inputs = document.querySelectorAll('#varBody tr.row td.name input');
+    if(inputs.length) inputs[inputs.length-1].focus();
+  }, 30);
+};
+
+function buildSummaryText(){
+  const lines = [];
+  lines.push('VENTA DEL PISO — resumen');
+  lines.push('Precio venta: ' + fmt(parseNum(data.precioVenta)) + ' €');
+  lines.push('');
+  lines.push('GASTOS FIJOS:');
+  data.fixed.forEach(it=> lines.push('- ' + (it.name||'(sin nombre)') + ': ' + fmt(parseNum(it.amount)) + ' €'));
+  lines.push('Subtotal fijos: ' + fmt(sum(data.fixed)) + ' €');
+  lines.push('');
+  lines.push('FUTUROS GASTOS:');
+  data.variable.forEach(it=> lines.push('- ' + (it.name||'(sin nombre)') + ': ' + fmt(parseNum(it.amount)) + ' €'));
+  lines.push('Subtotal futuros: ' + fmt(sum(data.variable)) + ' €');
+  lines.push('');
+  const disponible = parseNum(data.precioVenta) - sum(data.fixed);
+  const queda = disponible - sum(data.variable);
+  lines.push('Disponible tras gastos fijos: ' + fmt(disponible) + ' €');
+  lines.push('Nos queda: ' + fmt(queda) + ' €');
+  return lines.join('\n');
+}
+
+document.getElementById('copyBtn').onclick = ()=>{
+  const text = buildSummaryText();
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(()=>{
+      alert('Resumen copiado. Ya puedes pegarlo en WhatsApp.');
+    }).catch(()=>{
+      prompt('Copia este texto manualmente:', text);
+    });
+  } else {
+    prompt('Copia este texto manualmente:', text);
+  }
+};
+
+document.getElementById('resetBtn').onclick = ()=>{
+  if(confirm('¿Restablecer todos los datos a los valores de ejemplo iniciales? Esto borrará lo que hayáis añadido.')){
+    data = JSON.parse(JSON.stringify(defaultData));
+    render();
+    scheduleSave();
+  }
+};
+
+init();
+</script>
+</body>
+</html>
